@@ -64,6 +64,36 @@
             ]
         },
         {
+            "name": "windows-vs2026-base",
+            "description": "Base Visual Studio 2026 configuration.",
+            "hidden": true,
+            "inherits": "windows-base",
+            "generator": "Visual Studio 18 2026",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
+            "toolset": {
+                "value": "host=x86",
+                "strategy": "set"
+            }
+        },
+        {
+            "name": "windows-vs2026",
+            "displayName": "Windows VS2026",
+            "inherits": [
+                "windows-vs2026-base"
+            ]
+        },
+        {
+            "name": "windows-vs2026-ci",
+            "displayName": "Windows VS2026 (CI)",
+            "inherits": [
+                "windows-vs2026-base",
+                "ci"
+            ]
+        },
+        {
             "name": "windows-ninja-msvc-base",
             "description": "Base Ninja configuration using MSVC.",
             "hidden": true,
