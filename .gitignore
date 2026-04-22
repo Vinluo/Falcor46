@@ -12,6 +12,12 @@
 /external/packman/
 /tools/.packman/
 
+# External asset dependencies (large, managed out-of-band).
+# Treat like a packman dep: keep a placeholder README in tree,
+# but never commit the actual scene payload.
+/external/assets/*
+!/external/assets/README.md
+
 # IDE folders.
 /.vs/
 /.vscode/
