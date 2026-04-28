@@ -36,12 +36,15 @@
 #endif
 
 // TODO: Replace by bit packing functions
-#define EXTRACT_BITS(bits, offset, value) (((value) >> (offset)) & ((1 << (bits)) - 1))
-#define IS_BIT_SET(value, bitOffset) ((value & (1 << bitOffset)) != 0)
+// Note: literals are explicitly unsigned (1u) so that Slang 2026's stricter integer-overflow
+// check on `~(((1 << bits) - 1) << offset)` doesn't reject these macros (the bitwise-NOT of
+// a positive int produces a negative int that then doesn't fit when implicitly cast to uint).
+#define EXTRACT_BITS(bits, offset, value) (((value) >> (offset)) & ((1u << (bits)) - 1u))
+#define IS_BIT_SET(value, bitOffset) ((value & (1u << bitOffset)) != 0)
 // TODO: Add check that "value" fits into "bits"
 #define PACK_BITS(bits, offset, flags, value) \
-    ((((value) & ((1 << (bits)) - 1)) << (offset)) | ((flags) & (~(((1 << (bits)) - 1) << (offset)))))
-#define PACK_BITS_UNSAFE(bits, offset, flags, value) (((value) << (offset)) | ((flags) & (~(((1 << (bits)) - 1) << (offset)))))
+    ((((value) & ((1u << (bits)) - 1u)) << (offset)) | ((flags) & (~(((1u << (bits)) - 1u) << (offset)))))
+#define PACK_BITS_UNSAFE(bits, offset, flags, value) (((value) << (offset)) | ((flags) & (~(((1u << (bits)) - 1u) << (offset)))))
 
 #define FALCOR_GPU_CACHE_SIZE 128
 

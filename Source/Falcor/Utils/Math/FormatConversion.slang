@@ -271,14 +271,12 @@ float2 unpackSnorm2x16(uint packed)
     return unpacked;
 }
 
-/**
- * Pack two floats into 16-bit snorm values in the lo/hi bits of a dword.
- * @return Two 16-bit snorm in low/high bits.
- */
-uint packSnorm2x16(precise float2 v)
-{
-    return (floatToSnorm16(v.x) & 0x0000ffff) | (floatToSnorm16(v.y) << 16);
-}
+// packSnorm2x16 removed: Slang 2026 stdlib (hlsl.meta.slang) provides this with the same
+// signature, causing ambiguous-call errors at every PackedFormats import site. Callers fall
+// through to the stdlib implementation, which uses the same HLSL snorm semantics
+// (clamp to [-1,1], round to nearest, pack into low/high half of a dword).
+// The unpackSnorm2x16 above is retained because the Slang stdlib does NOT provide it
+// (it has only the pack direction); this asymmetry is also why we keep both 2x8 variants.
 
 ///////////////////////////////////////////////////////////////////////////////
 //                              16-bit unorm

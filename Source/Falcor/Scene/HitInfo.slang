@@ -141,7 +141,11 @@ struct DisplacedTriangleHit : GeometryHit
         barycentrics = float2(ux, uy) * (1.f / 16777215);
         displacement = f16tof32(packed[3]);
 #else
-        this = {};
+        // Slang 2026 disallows `this = {};` once an explicit __init exists; zero each field.
+        instanceID.index = 0;
+        primitiveIndex = 0;
+        barycentrics = float2(0);
+        displacement = 0;
 #endif
     }
 
@@ -173,7 +177,10 @@ struct CurveHit : GeometryHit
         barycentrics.x = asfloat(packed[2]);
         barycentrics.y = asfloat(packed[3]);
 #else
-        this = {};
+        // Slang 2026 disallows `this = {};` once an explicit __init exists; zero each field.
+        instanceID.index = 0;
+        primitiveIndex = 0;
+        barycentrics = float2(0);
 #endif
     }
 
@@ -221,7 +228,9 @@ struct SDFGridHit
 
 
 #else
-        this = {};
+        // Slang 2026 disallows `this = {};` once an explicit __init exists; zero each field.
+        instanceID.index = 0;
+        hitData = {};
 #endif // SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_SDF_GRID)
     }
 

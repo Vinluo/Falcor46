@@ -36,6 +36,15 @@
 
 #include <map>
 
+// Slang 2026 deprecated several "pending data layout" reflection APIs in favor of explicit
+// type-layout queries. Falcor's reflection chain still wants the legacy view; suppress the
+// deprecation warning at file scope until we migrate to the new API.
+#if defined(_MSC_VER)
+#pragma warning(disable : 4996)
+#elif defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 using namespace slang;
 
 namespace Falcor
