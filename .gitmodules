@@ -16,3 +16,6 @@
 [submodule "external/vulkan-headers"]
 	path = external/vulkan-headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers
+[submodule "neural-irradiance-volume"]
+	path = neural-irradiance-volume
+	url = https://github.com/Vinluo/neural-irradiance-volume.git
