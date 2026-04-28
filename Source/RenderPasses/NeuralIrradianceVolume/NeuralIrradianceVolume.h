@@ -9,10 +9,8 @@ using namespace Falcor;
  *
  * Consumes G-buffer channels and produces an indirect-illumination + direct
  * lighting composite using a hash-grid + small MLP (CoopVec) baked from offline
- * training. See plan: niv-viewer-falcor-twinkly-globe.md.
- *
- * Step 1/2 scaffold: pass registers, reflects channels, dispatches a
- * placeholder compute shader. Real evalNIV/evalDirect comes in Step 3.
+ * training. See plan: niv-viewer-falcor-twinkly-globe.md and the binary format
+ * documented at the top of scripts/niv_export_weights.py.
  */
 class NeuralIrradianceVolume : public RenderPass
 {
@@ -34,14 +32,34 @@ public:
 
 private:
     void parseProperties(const Properties& props);
+    void loadWeights(const std::filesystem::path& path);
+    void buildPass();
 
     ref<Scene> mpScene;
     ref<ComputePass> mpComposite;
 
-    // Configuration (placeholder values; will be filled out in Step 3+).
+    // Configuration.
     std::string mWeightsPath = "niv_weights/breakfast_room.bin";
-    bool mEnableDirect = true;
-    bool mEnableIndirect = true;
-    float mNivScale = 1.f;
-    float mExposure = 1.f;
+    bool        mEnableDirect    = true;
+    bool        mEnableIndirect  = true;
+    float       mNivScale        = 1.f;
+    float       mExposure        = 1.f;
+
+    // Loaded weight binary fields (see scripts/niv_export_weights.py header layout).
+    bool        mWeightsLoaded   = false;
+    uint32_t    mNumLevels       = 0;
+    uint32_t    mHashTableSize   = 0;
+    uint32_t    mFeatureDim      = 0;
+    uint32_t    mMlpLayers       = 0;
+    uint32_t    mMlpHidden       = 0;
+    uint32_t    mInputDim        = 0;
+    uint32_t    mOutputDim       = 0;
+    float3      mAabbMin         = float3(0);
+    float3      mAabbMax         = float3(0);
+
+    ref<Buffer> mpResolutionsBuf;   ///< StructuredBuffer<int>, length numLevels.
+    ref<Buffer> mpHashTablesBuf;    ///< StructuredBuffer<uint>, packed fp16 pairs.
+    ref<Buffer> mpMlpOffsetsBuf;    ///< StructuredBuffer<uint>, length 2*mlpLayers.
+    ref<Buffer> mpMlpWeightsBuf;    ///< Raw byte buffer, ByteAddressBuffer-readable.
+    ref<Buffer> mpMlpBiasesBuf;     ///< Raw byte buffer, ByteAddressBuffer-readable.
 };

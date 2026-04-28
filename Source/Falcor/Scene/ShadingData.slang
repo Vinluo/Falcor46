@@ -65,6 +65,10 @@ struct ShadingData : IDifferentiable
     uint geometryGradOffset;            ///< Offset to the geometry gradient in the gradient buffer.
     uint threadID;                      ///< Thread ID for gradient aggregation with a hash grid.
 
+    // Slang 2026 generates a memberwise __init for differentiable structs and no longer
+    // synthesizes a default ctor, breaking the widely used `ShadingData sd = {};` idiom.
+    // Provide an explicit no-arg constructor so existing call sites keep compiling.
+    __init() {}
 
     // Utility functions
 

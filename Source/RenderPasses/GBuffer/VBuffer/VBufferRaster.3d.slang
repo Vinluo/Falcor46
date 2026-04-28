@@ -61,7 +61,7 @@ struct VBufferVSOut
 VBufferVSOut vsMain(VSIn vsIn)
 {
     VBufferVSOut vsOut;
-    const GeometryInstanceID instanceID = { vsIn.instanceID };
+    const GeometryInstanceID instanceID = GeometryInstanceID(vsIn.instanceID);
 
     float4x4 worldMat = gScene.getWorldMatrix(instanceID);
     float3 posW = mul(worldMat, float4(vsIn.pos, 1.f)).xyz;

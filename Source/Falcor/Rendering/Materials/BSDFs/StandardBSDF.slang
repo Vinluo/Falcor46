@@ -71,6 +71,10 @@ struct StandardBSDFData : IDifferentiable
     bool hasEntryPointVolumeProperties; ///< Flag that specifies from where sigmaA is taken from (volume or surface).
     bool hasSigmaSGreaterZero;          ///< Flag that indicates if we have to do albedo conversion
 
+    // Slang 2026 no longer auto-generates a default ctor when an explicit __init exists,
+    // which breaks the `StandardBSDFData d = {};` pattern used at multiple call sites.
+    __init() {}
+
     [Differentiable]
     __init(const DiffMaterialData diffData)
     {

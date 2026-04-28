@@ -59,6 +59,17 @@ struct GeometryInstanceID
     {
         index = instanceID + geometryIndex;
     }
+
+    // Slang 2026: brace-init `{ raw }` no longer initializes .index directly when the
+    // struct has explicit __init. Provide an explicit single-arg ctor that matches the
+    // legacy "stuff a precomputed index in" semantics.
+    __init(uint precomputedIndex)
+    {
+        index = precomputedIndex;
+    }
+
+    // Default ctor needed by `GeometryInstanceID id = {};` patterns.
+    __init() { index = 0; }
 #endif
 };
 
