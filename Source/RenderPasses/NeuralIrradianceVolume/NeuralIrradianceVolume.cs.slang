@@ -1,34 +1,26 @@
-// NeuralIrradianceVolume composite pass.
+// NeuralIrradianceVolume — indirect-only pass.
 //
 // Consumes Falcor GBufferRaster outputs (posW, normW, diffuseOpacity) and
-// produces an NIV-evaluated indirect-illumination color. Indirect light is
-// computed as `(albedo / pi) * irradiance(pos, normal)` where the irradiance
-// network is a hash-grid encoder (Mueller et al. multi-resolution hash) feeding
-// a 4-layer 64-wide MLP.
+// produces NIV-evaluated indirect illumination:
+//     color = nivScale * albedo / pi * irradianceMLP(pos, normal)
+// Direct lighting and tonemapping are downstream concerns.
 //
-// First-pass implementation uses plain row-major fp16 MADs rather than Slang's
-// cooperative-vector intrinsics. CoopVec is the long-term optimization: in this
-// integration the intrinsics linked silently (no diagnostic), so we ship the
-// portable variant first and revisit CoopVec with the right SM / Vulkan profile
-// once a baseline image is verified.
-//
-// Direct lighting and emissive contribution are deferred to a follow-up step
-// (will reintroduce `import Scene.Scene` + SceneRayQuery). The toggle is wired
-// through to keep the UI live.
+// The irradiance network is a hash-grid encoder (Mueller et al. multi-resolution
+// hash) feeding a 4-layer 64-wide fp16 MLP. First-pass implementation uses plain
+// row-major fp16 MADs rather than Slang's cooperative-vector intrinsics. CoopVec
+// is the long-term optimization: in this integration the intrinsics linked
+// silently (no diagnostic), so we ship the portable variant first and revisit
+// CoopVec with the right SM / Vulkan profile once a baseline image is verified.
 
 cbuffer NIV_CB
 {
     uint2  gResolution;
-    uint   gEnableDirect;
-    uint   gEnableIndirect;
     float  gNivScale;
-    float  gExposure;
     float  _pad0;
-    float  _pad1;
     float3 gAabbMin;
-    float  _pad2;
+    float  _pad1;
     float3 gAabbMax;
-    float  _pad3;
+    float  _pad2;
 };
 
 // G-buffer inputs from GBufferRaster.
@@ -198,19 +190,11 @@ void main(uint3 tid : SV_DispatchThreadID)
     float3 albedo = gDiffuseOpacity.Load(int3(ipix, 0)).xyz;
 
     float3 color = float3(0);
-
-    if (isHit && gEnableIndirect != 0)
+    if (isHit)
     {
         float3 irradiance = evalNIV(hitPos, hitN);
-        color += gNivScale * albedo * (irradiance / 3.14159265f);
+        color = gNivScale * albedo * (irradiance / 3.14159265f);
     }
 
-    // Direct lighting deferred — kept as a UI toggle for the follow-up step.
-    if (gEnableDirect != 0)
-    {
-        // intentionally empty for now
-    }
-
-    color *= gExposure;
     gOutputColor[ipix] = float4(color, 1.0f);
 }

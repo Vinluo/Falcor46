@@ -44,54 +44,42 @@ struct PixelData
     static const uint kInvalidIndex = 0xffffffff;
 
     // Geometry data
-    float3 posW;
-    float3 normal;
-    float3 tangent;
-    float3 bitangent;
-    float3 faceNormal;
-    float3 view;
-    float2 texCoord;
-    int frontFacing;
+    float3 posW = float3(0);
+    float3 normal = float3(0);
+    float3 tangent = float3(0);
+    float3 bitangent = float3(0);
+    float3 faceNormal = float3(0);
+    float3 view = float3(0);
+    float2 texCoord = float2(0);
+    int frontFacing = 0;
 
     // Material data
-    uint materialID;
-    int doubleSided;
-    float opacity;
-    float IoR;
+    uint materialID = 0;
+    int doubleSided = 0;
+    float opacity = 0.f;
+    float IoR = 0.f;
 
     // Material instance properties
-    float3 emission;
-    float roughness;
-    float3 guideNormal;
-    float3 diffuseReflectionAlbedo;
-    float3 diffuseTransmissionAlbedo;
-    float3 specularReflectionAlbedo;
-    float3 specularTransmissionAlbedo;
-    float3 specularReflectance;
-    int isTransmissive;
+    float3 emission = float3(0);
+    float roughness = 0.f;
+    float3 guideNormal = float3(0);
+    float3 diffuseReflectionAlbedo = float3(0);
+    float3 diffuseTransmissionAlbedo = float3(0);
+    float3 specularReflectionAlbedo = float3(0);
+    float3 specularTransmissionAlbedo = float3(0);
+    float3 specularReflectance = float3(0);
+    int isTransmissive = 0;
 
     // Output data
-    float4 linearColor;
-    float4 outputColor;
-    float luminance;
+    float4 linearColor = float4(0);
+    float4 outputColor = float4(0);
+    float luminance = 0.f;
 
     // Visibility data
-    uint hitType; ///< Type of hit, see enum HitType. Only valid if instanceID != kInvalidIndex.
-    uint instanceID;
-    uint primitiveIndex;
-    float2 barycentrics;
-
-#ifndef HOST_CODE
-    __init()
-    {
-        this = {};
-
-        // V-buffer data.
-        hitType = (uint)HitType::Triangle;
-        instanceID = kInvalidIndex;
-        primitiveIndex = kInvalidIndex;
-    }
-#endif
+    uint hitType = 0;
+    uint instanceID = kInvalidIndex;
+    uint primitiveIndex = kInvalidIndex;
+    float2 barycentrics = float2(0);
 };
 
 END_NAMESPACE_FALCOR

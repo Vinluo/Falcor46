@@ -58,22 +58,27 @@ static const float kMinGGXAlpha = 0.0064f;
  */
 struct StandardBSDFData : IDifferentiable
 {
-    float3 diffuse;                     ///< Diffuse albedo.
-    float3 specular;                    ///< Specular albedo.
-    float roughness;                    ///< This is the original roughness, before remapping.
-    float metallic;                     ///< Metallic parameter, blends between dielectric and conducting BSDFs.
-    float eta;                          ///< Relative index of refraction (incident IoR / transmissive IoR).
-    float3 transmission;                ///< Transmission color.
-    float diffuseTransmission;          ///< Diffuse transmission, blends between diffuse reflection and transmission lobes.
-    float specularTransmission;         ///< Specular transmission, blends between opaque dielectric BRDF and specular transmissive BSDF.
-    float3 volumeScattering;            ///< Volume scattering parameters from the volume.
-    float volumeAnsiotropy;             ///< Mean cosine of the volumetric phase function.
-    bool hasEntryPointVolumeProperties; ///< Flag that specifies from where sigmaA is taken from (volume or surface).
-    bool hasSigmaSGreaterZero;          ///< Flag that indicates if we have to do albedo conversion
+    float3 diffuse = float3(0);         ///< Diffuse albedo.
+    float3 specular = float3(0);        ///< Specular albedo.
+    float roughness = 0.f;              ///< This is the original roughness, before remapping.
+    float metallic = 0.f;               ///< Metallic parameter, blends between dielectric and conducting BSDFs.
+    float eta = 0.f;                    ///< Relative index of refraction (incident IoR / transmissive IoR).
+    float3 transmission = float3(0);    ///< Transmission color.
+    float diffuseTransmission = 0.f;    ///< Diffuse transmission, blends between diffuse reflection and transmission lobes.
+    float specularTransmission = 0.f;   ///< Specular transmission, blends between opaque dielectric BRDF and specular transmissive BSDF.
+    float3 volumeScattering = float3(0);///< Volume scattering parameters from the volume.
+    float volumeAnsiotropy = 0.f;       ///< Mean cosine of the volumetric phase function.
+    bool hasEntryPointVolumeProperties = false; ///< Flag that specifies from where sigmaA is taken from (volume or surface).
+    bool hasSigmaSGreaterZero = false;  ///< Flag that indicates if we have to do albedo conversion
 
-    // Slang 2026 no longer auto-generates a default ctor when an explicit __init exists,
-    // which breaks the `StandardBSDFData d = {};` pattern used at multiple call sites.
-    __init() {}
+    __init()
+    {
+        diffuse = float3(0); specular = float3(0);
+        roughness = 0.f; metallic = 0.f; eta = 0.f;
+        transmission = float3(0); diffuseTransmission = 0.f; specularTransmission = 0.f;
+        volumeScattering = float3(0); volumeAnsiotropy = 0.f;
+        hasEntryPointVolumeProperties = false; hasSigmaSGreaterZero = false;
+    }
 
     [Differentiable]
     __init(const DiffMaterialData diffData)

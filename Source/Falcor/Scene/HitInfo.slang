@@ -68,8 +68,8 @@ typedef uint4 PackedHitInfo;
 struct GeometryHit
 {
     GeometryInstanceID instanceID;
-    uint primitiveIndex;
-    float2 barycentrics;
+    uint primitiveIndex = 0;
+    float2 barycentrics = float2(0);
 
     /** Return the barycentric weights.
     */
@@ -101,8 +101,6 @@ struct TriangleHit : GeometryHit
         barycentrics.x = asfloat(packed[2]);
         barycentrics.y = asfloat(packed[3]);
 #endif
-#else
-        this = {};
 #endif
     }
 
@@ -130,7 +128,7 @@ struct TriangleHit : GeometryHit
 */
 struct DisplacedTriangleHit : GeometryHit
 {
-    float displacement;
+    float displacement = 0.f;
 
     __init(const PackedHitInfo packed)
     {
@@ -140,12 +138,6 @@ struct DisplacedTriangleHit : GeometryHit
         const uint uy = ((packed[2] & 0xff) << 16) | (packed[3] >> 16);
         barycentrics = float2(ux, uy) * (1.f / 16777215);
         displacement = f16tof32(packed[3]);
-#else
-        // Slang 2026 disallows `this = {};` once an explicit __init exists; zero each field.
-        instanceID.index = 0;
-        primitiveIndex = 0;
-        barycentrics = float2(0);
-        displacement = 0;
 #endif
     }
 
@@ -176,11 +168,6 @@ struct CurveHit : GeometryHit
         HitInfo::unpackHeader(packed, instanceID, primitiveIndex);
         barycentrics.x = asfloat(packed[2]);
         barycentrics.y = asfloat(packed[3]);
-#else
-        // Slang 2026 disallows `this = {};` once an explicit __init exists; zero each field.
-        instanceID.index = 0;
-        primitiveIndex = 0;
-        barycentrics = float2(0);
 #endif
     }
 
@@ -227,10 +214,6 @@ struct SDFGridHit
 #endif
 
 
-#else
-        // Slang 2026 disallows `this = {};` once an explicit __init exists; zero each field.
-        instanceID.index = 0;
-        hitData = {};
 #endif // SCENE_HAS_GEOMETRY_TYPE(GEOMETRY_TYPE_SDF_GRID)
     }
 

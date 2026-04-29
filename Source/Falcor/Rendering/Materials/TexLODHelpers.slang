@@ -66,20 +66,26 @@ import Scene.SceneTypes; // Needed for ray bounce helpers.
 struct RayCone
 {
 #ifndef USE_RAYCONES_WITH_FP16_IN_RAYPAYLOAD
-    float width;
-    float spreadAngle;
+    float width = 0.f;
+    float spreadAngle = 0.f;
     float getWidth()            { return width; }
     float getSpreadAngle()      { return spreadAngle; }
 #else
-    uint widthSpreadAngleFP16;
+    uint widthSpreadAngleFP16 = 0;
     float getWidth()            { return f16tof32(widthSpreadAngleFP16 >> 16); }
     float getSpreadAngle()      { return f16tof32(widthSpreadAngleFP16); }
 #endif
 
-    /** Initializes a ray cone struct.
-        \param[in] width The width of the ray cone.
-        \param[in] angle The angle of the ray cone.
-    */
+    __init()
+    {
+#ifndef USE_RAYCONES_WITH_FP16_IN_RAYPAYLOAD
+        width = 0.f;
+        spreadAngle = 0.f;
+#else
+        widthSpreadAngleFP16 = 0;
+#endif
+    }
+
     __init(float width, float angle)
     {
 #ifndef USE_RAYCONES_WITH_FP16_IN_RAYPAYLOAD
@@ -460,22 +466,21 @@ bool refractRayCone(inout RayCone rayCone, float3 rayOrg, float3 rayDir, float3 
 */
 struct RayDiff
 {
-    float3 dOdx;
-    float3 dOdy;
-    float3 dDdx;
-    float3 dDdy;
+    float3 dOdx = float3(0);
+    float3 dOdy = float3(0);
+    float3 dDdx = float3(0);
+    float3 dDdy = float3(0);
 
-    float3 getdOdx() { return dOdx; }   // These are not super-useful right now, but TODO to add FP16 version later on
+    float3 getdOdx() { return dOdx; }
     float3 getdOdy() { return dOdy; }
     float3 getdDdx() { return dDdx; }
     float3 getdDdy() { return dDdy; }
 
-    /** Initializes a ray differential struct.
-        \param[in] dOdx The differential ray origin in x.
-        \param[in] dOdy The differential ray origin in y.
-        \param[in] dDdx The differential ray direction in x.
-        \param[in] dDdy The differential ray direction in y.
-    */
+    __init()
+    {
+        dOdx = float3(0); dOdy = float3(0); dDdx = float3(0); dDdy = float3(0);
+    }
+
     __init(float3 dOdx, float3 dOdy, float3 dDdx, float3 dDdy)
     {
         this.dOdx = dOdx;

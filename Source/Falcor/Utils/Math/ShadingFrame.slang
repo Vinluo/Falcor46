@@ -33,16 +33,12 @@ import Utils.Math.MathHelpers;
  */
 struct ShadingFrame : IDifferentiable
 {
-    float3 T; ///< Shading tangent. Normalized.
-    float3 B; ///< Shading bitangent. Normalized.
-    float3 N; ///< Shading normal. Normalized.
+    float3 T = float3(0); ///< Shading tangent. Normalized.
+    float3 B = float3(0); ///< Shading bitangent. Normalized.
+    float3 N = float3(0); ///< Shading normal. Normalized.
 
-    /**
-     * Initialize shading frame from normal and tangent.
-     * It is assumed the shading frame can be safely orthonormalized. If in doubt, use `createSafe` instead.
-     * @param[in] Normal in world space. Not normalized.
-     * @param[in] Target tangent in world space (xyz) and handedness sign (w). Not normalized.
-     */
+    __init() { T = float3(0); B = float3(0); N = float3(0); }
+
     [Differentiable]
     __init(const float3 normalW, const float4 tangentW)
     {

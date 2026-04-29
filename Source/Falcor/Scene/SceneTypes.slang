@@ -48,27 +48,19 @@ BEGIN_NAMESPACE_FALCOR
 */
 struct GeometryInstanceID
 {
-    uint index;             ///< Global instance index. This is computed as InstanceID() + GeometryIndex().
+    uint index = 0;         ///< Global instance index. This is computed as InstanceID() + GeometryIndex().
 
 #ifndef HOST_CODE
-    /** Construct a geometry instance ID.
-        \param[in] instanceID The DXR InstanceID() system value.
-        \param[in] geometryIndex The DXR GeometryIndex() system value.
-    */
     __init(uint instanceID, uint geometryIndex)
     {
         index = instanceID + geometryIndex;
     }
 
-    // Slang 2026: brace-init `{ raw }` no longer initializes .index directly when the
-    // struct has explicit __init. Provide an explicit single-arg ctor that matches the
-    // legacy "stuff a precomputed index in" semantics.
     __init(uint precomputedIndex)
     {
         index = precomputedIndex;
     }
 
-    // Default ctor needed by `GeometryInstanceID id = {};` patterns.
     __init() { index = 0; }
 #endif
 };

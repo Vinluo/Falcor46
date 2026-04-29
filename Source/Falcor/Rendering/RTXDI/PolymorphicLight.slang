@@ -131,11 +131,16 @@ interface IPolymorphicLight
 */
 struct EmissiveLight : IPolymorphicLight
 {
-    uint triIdx;            ///< Global triangle index in the scene's LightCollection.
-    float3 position;        ///< Position in world-space.
-    float3 edge0;           ///< First triangle edge in world-space.
-    float3 edge1;           ///< Second triangle edge in world-space.
-    float averageRadiance;  ///< Average emitted radiance (scalar).
+    uint triIdx = 0;            ///< Global triangle index in the scene's LightCollection.
+    float3 position = float3(0);///< Position in world-space.
+    float3 edge0 = float3(0);  ///< First triangle edge in world-space.
+    float3 edge1 = float3(0);  ///< Second triangle edge in world-space.
+    float averageRadiance = 0.f;///< Average emitted radiance (scalar).
+
+    __init()
+    {
+        triIdx = 0; position = float3(0); edge0 = float3(0); edge1 = float3(0); averageRadiance = 0.f;
+    }
 
     __init(const PackedPolymorphicLight packed)
     {
@@ -236,7 +241,9 @@ struct EmissiveLight : IPolymorphicLight
 */
 struct AnalyticLight : IPolymorphicLight
 {
-    uint lightID;
+    uint lightID = 0;
+
+    __init() { lightID = 0; }
 
     __init(const PackedPolymorphicLight packed)
     {
@@ -305,6 +312,8 @@ struct AnalyticLight : IPolymorphicLight
 */
 struct EnvLight : IPolymorphicLight
 {
+    __init() {}
+
     __init(const PackedPolymorphicLight packed)
     {
     }
@@ -355,7 +364,7 @@ struct EnvLight : IPolymorphicLight
 */
 struct PolymorphicLight : IPolymorphicLight
 {
-    PackedPolymorphicLight packed;
+    PackedPolymorphicLight packed = {};
 
     __init(const PackedPolymorphicLight packed)
     {

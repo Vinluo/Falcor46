@@ -28,15 +28,12 @@ const ChannelList kInputChannels = {
 
 const ChannelList kOutputChannels = {
     // clang-format off
-    { "color",           "gOutputColor",     "Composite (direct + indirect)",                    false, ResourceFormat::RGBA32Float },
+    { "color",           "gOutputColor",     "NIV indirect illumination (linear, pre-tonemap)",  false, ResourceFormat::RGBA32Float },
     // clang-format on
 };
 
-const char kWeightsPath[]    = "weightsPath";
-const char kEnableDirect[]   = "enableDirect";
-const char kEnableIndirect[] = "enableIndirect";
-const char kNivScale[]       = "nivScale";
-const char kExposure[]       = "exposure";
+const char kWeightsPath[]   = "weightsPath";
+const char kNivScale[]      = "nivScale";
 
 // Mirrored from scripts/niv_export_weights.py — keep in sync if header is bumped.
 struct NivBinHeader
@@ -82,14 +79,8 @@ void NeuralIrradianceVolume::parseProperties(const Properties& props)
     {
         if (key == kWeightsPath)
             mWeightsPath = value.operator std::string();
-        else if (key == kEnableDirect)
-            mEnableDirect = value;
-        else if (key == kEnableIndirect)
-            mEnableIndirect = value;
         else if (key == kNivScale)
             mNivScale = value;
-        else if (key == kExposure)
-            mExposure = value;
         else
             logWarning("Unknown property '{}' in NeuralIrradianceVolume properties.", key);
     }
@@ -98,11 +89,8 @@ void NeuralIrradianceVolume::parseProperties(const Properties& props)
 Properties NeuralIrradianceVolume::getProperties() const
 {
     Properties props;
-    props[kWeightsPath]    = mWeightsPath;
-    props[kEnableDirect]   = mEnableDirect;
-    props[kEnableIndirect] = mEnableIndirect;
-    props[kNivScale]       = mNivScale;
-    props[kExposure]       = mExposure;
+    props[kWeightsPath] = mWeightsPath;
+    props[kNivScale]    = mNivScale;
     return props;
 }
 
@@ -235,18 +223,15 @@ void NeuralIrradianceVolume::execute(RenderContext* pRenderContext, const Render
     }
 
     auto var = mpComposite->getRootVar();
-    var["NIV_CB"]["gResolution"]      = dim;
-    var["NIV_CB"]["gEnableDirect"]    = mEnableDirect ? 1u : 0u;
-    var["NIV_CB"]["gEnableIndirect"]  = mEnableIndirect ? 1u : 0u;
-    var["NIV_CB"]["gNivScale"]        = mNivScale;
-    var["NIV_CB"]["gExposure"]        = mExposure;
-    var["NIV_CB"]["gAabbMin"]         = mAabbMin;
-    var["NIV_CB"]["gAabbMax"]         = mAabbMax;
+    var["NIV_CB"]["gResolution"] = dim;
+    var["NIV_CB"]["gNivScale"]   = mNivScale;
+    var["NIV_CB"]["gAabbMin"]    = mAabbMin;
+    var["NIV_CB"]["gAabbMax"]    = mAabbMax;
 
     // G-buffer inputs (texture binds; tolerate missing optional channels).
-    var["gPosW"]            = renderData.getTexture("posW");
-    var["gNormW"]           = renderData.getTexture("normW");
-    var["gDiffuseOpacity"]  = renderData.getTexture("diffuseOpacity");
+    var["gPosW"]           = renderData.getTexture("posW");
+    var["gNormW"]          = renderData.getTexture("normW");
+    var["gDiffuseOpacity"] = renderData.getTexture("diffuseOpacity");
 
     var["gResolutions"]     = mpResolutionsBuf;
     var["gHashTables"]      = mpHashTablesBuf;
@@ -265,10 +250,7 @@ void NeuralIrradianceVolume::renderUI(Gui::Widgets& widget)
     widget.textbox("Weights path", mWeightsPath);
     if (widget.button("Reload weights"))
         loadWeights(mWeightsPath);
-    widget.checkbox("Enable direct (currently no-op)", mEnableDirect);
-    widget.checkbox("Enable indirect (NIV)", mEnableIndirect);
     widget.var("NIV scale", mNivScale, 0.f, 16.f, 0.01f);
-    widget.var("Exposure", mExposure, 0.f, 16.f, 0.01f);
 }
 
 void NeuralIrradianceVolume::setScene(RenderContext* pRenderContext, const ref<Scene>& pScene)

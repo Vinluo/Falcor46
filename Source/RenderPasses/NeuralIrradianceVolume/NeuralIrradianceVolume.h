@@ -5,17 +5,20 @@
 using namespace Falcor;
 
 /**
- * Neural Irradiance Volume composite pass.
+ * Neural Irradiance Volume pass.
  *
- * Consumes G-buffer channels and produces an indirect-illumination + direct
- * lighting composite using a hash-grid + small MLP (CoopVec) baked from offline
- * training. See plan: niv-viewer-falcor-twinkly-globe.md and the binary format
- * documented at the top of scripts/niv_export_weights.py.
+ * Consumes G-buffer channels and produces *indirect* illumination only:
+ *   color = nivScale * albedo / PI * irradianceMLP(pos, normal)
+ * using a hash-grid encoder + small MLP baked offline. Direct lighting and
+ * tonemapping are handled by separate downstream passes (e.g. RTXDIPass +
+ * a composite add-pass + ToneMapper).
+ *
+ * Binary format documented at the top of scripts/niv_export_weights.py.
  */
 class NeuralIrradianceVolume : public RenderPass
 {
 public:
-    FALCOR_PLUGIN_CLASS(NeuralIrradianceVolume, "NeuralIrradianceVolume", "Neural irradiance volume composite + direct lighting.");
+    FALCOR_PLUGIN_CLASS(NeuralIrradianceVolume, "NeuralIrradianceVolume", "Neural irradiance volume (indirect lighting only).");
 
     static ref<NeuralIrradianceVolume> create(ref<Device> pDevice, const Properties& props)
     {
@@ -40,10 +43,7 @@ private:
 
     // Configuration.
     std::string mWeightsPath = "niv_weights/breakfast_room.bin";
-    bool        mEnableDirect    = true;
-    bool        mEnableIndirect  = true;
-    float       mNivScale        = 1.f;
-    float       mExposure        = 1.f;
+    float       mNivScale    = 1.f;
 
     // Loaded weight binary fields (see scripts/niv_export_weights.py header layout).
     bool        mWeightsLoaded   = false;

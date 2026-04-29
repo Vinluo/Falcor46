@@ -46,29 +46,32 @@ import Utils.Math.ShadingFrame;
 struct ShadingData : IDifferentiable
 {
     // Geometry data
-    float3  posW;                       ///< Shading hit position in world space.
-    float3  V;                          ///< View direction, -incident direction (-ray.dir)
-    float2  uv;                         ///< Texture mapping coordinates.
+    float3  posW = float3(0);            ///< Shading hit position in world space.
+    float3  V = float3(0);              ///< View direction, -incident direction (-ray.dir)
+    float2  uv = float2(0);            ///< Texture mapping coordinates.
 
-    ShadingFrame frame;                 ///< Smooth interpolated shading frame in world space at the shading point. The normal is *not* automatically flipped for backfacing hits.
-    no_diff float3  faceN;              ///< Face normal in world space, always on the front-facing side.
-    no_diff float4  tangentW;           ///< Geometric tangent (xyz) and sign (w) in world space. This is used for orthogonalization. Not normalized, but it is guaranteed to be nonzero and sign (w) is +-1.0.
-    bool            frontFacing;        ///< True if primitive seen from the front-facing side, i.e., dot(V, faceN) >= 0.0.
-    no_diff float   curveRadius;        ///< Curve cross-sectional radius. Valid only for geometry generated from curves.
+    ShadingFrame frame;                 ///< Smooth interpolated shading frame in world space at the shading point.
+    no_diff float3  faceN = float3(0);  ///< Face normal in world space, always on the front-facing side.
+    no_diff float4  tangentW = float4(0); ///< Geometric tangent (xyz) and sign (w) in world space.
+    bool            frontFacing = false;///< True if primitive seen from the front-facing side.
+    no_diff float   curveRadius = 0.f;  ///< Curve cross-sectional radius. Valid only for geometry generated from curves.
 
     // Material data
     MaterialHeader mtl;                 ///< Material header data.
-    uint    materialID;                 ///< Material ID at shading location.
-    float   IoR;                        ///< Index of refraction for the medium on the front-facing side (i.e. "outside" the material at the hit).
+    uint    materialID = 0;             ///< Material ID at shading location.
+    float   IoR = 0.f;                  ///< Index of refraction for the medium on the front-facing side.
 
-    uint materialGradOffset;            ///< Offset to the material gradient in the gradient buffer.
-    uint geometryGradOffset;            ///< Offset to the geometry gradient in the gradient buffer.
-    uint threadID;                      ///< Thread ID for gradient aggregation with a hash grid.
+    uint materialGradOffset = 0;        ///< Offset to the material gradient in the gradient buffer.
+    uint geometryGradOffset = 0;        ///< Offset to the geometry gradient in the gradient buffer.
+    uint threadID = 0;                  ///< Thread ID for gradient aggregation with a hash grid.
 
-    // Slang 2026 generates a memberwise __init for differentiable structs and no longer
-    // synthesizes a default ctor, breaking the widely used `ShadingData sd = {};` idiom.
-    // Provide an explicit no-arg constructor so existing call sites keep compiling.
-    __init() {}
+    __init()
+    {
+        posW = float3(0); V = float3(0); uv = float2(0);
+        faceN = float3(0); tangentW = float4(0); frontFacing = false; curveRadius = 0.f;
+        materialID = 0; IoR = 0.f;
+        materialGradOffset = 0; geometryGradOffset = 0; threadID = 0;
+    }
 
     // Utility functions
 

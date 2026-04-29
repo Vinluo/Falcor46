@@ -81,23 +81,22 @@ enum class BounceType
 */
 struct PathState
 {
-    uint        id;                     ///< Path ID encodes (pixel, sampleIdx) with 12 bits each for pixel x|y and 8 bits for sample index.
+    uint        id = 0;                 ///< Path ID encodes (pixel, sampleIdx) with 12 bits each for pixel x|y and 8 bits for sample index.
 
-    uint        flagsAndVertexIndex;    ///< Higher kPathFlagsBitCount bits: Flags indicating the current status. This can be multiple PathFlags flags OR'ed together.
-                                        ///< Lower kVertexIndexBitCount bits: Current vertex index (0 = camera, 1 = primary hit, 2 = secondary hit, etc.).
-    uint16_t    rejectedHits;           ///< Number of false intersections rejected along the path. This is used as a safeguard to avoid deadlock in pathological cases.
-    float16_t   sceneLength;            ///< Path length in scene units (0.f at primary hit).
-    uint        bounceCounters;         ///< Packed counters for different types of bounces (see BounceType).
+    uint        flagsAndVertexIndex = 0;///< Higher kPathFlagsBitCount bits: Flags indicating the current status.
+    uint16_t    rejectedHits = uint16_t(0); ///< Number of false intersections rejected along the path.
+    float16_t   sceneLength = float16_t(0); ///< Path length in scene units (0.f at primary hit).
+    uint        bounceCounters = 0;     ///< Packed counters for different types of bounces (see BounceType).
 
     // Scatter ray
-    float3      origin;                 ///< Origin of the scatter ray.
-    float3      dir;                    ///< Scatter ray normalized direction.
-    float       pdf;                    ///< Pdf for generating the scatter ray.
-    float3      normal;                 ///< Shading normal at the scatter ray origin.
-    HitInfo     hit;                    ///< Hit information for the scatter ray. This is populated at committed triangle hits.
+    float3      origin = float3(0);     ///< Origin of the scatter ray.
+    float3      dir = float3(0);        ///< Scatter ray normalized direction.
+    float       pdf = 0.f;              ///< Pdf for generating the scatter ray.
+    float3      normal = float3(0);     ///< Shading normal at the scatter ray origin.
+    HitInfo     hit;                    ///< Hit information for the scatter ray.
 
-    float3      thp;                    ///< Path throughput.
-    float3      L;                      ///< Accumulated path contribution.
+    float3      thp = float3(0);        ///< Path throughput.
+    float3      L = float3(0);          ///< Accumulated path contribution.
 
     GuideData   guideData;              ///< Denoiser guide data.
     InteriorList interiorList;          ///< Interior list. Keeping track of a stack of materials with medium properties.

@@ -60,6 +60,15 @@ struct PathPayload
     InteriorList interiorList;  ///< Interior list. Keeping track of a stack of materials with medium properties. The size depends on the config (4B/item).
     SampleGenerator sg;         ///< Sample generator state. Typically 4-16B.
 
+    __init()
+    {
+        [unroll] for (uint i = 0; i < 5; i++) packed[i] = uint4(0);
+        hit = uint4(0);
+        guideData.data = uint4(0);
+        guideData.reflectionPos = float3(0);
+        guideData.dummy = 0;
+    }
+
     static PathPayload pack(const PathState path)
     {
         PathPayload p = {};
