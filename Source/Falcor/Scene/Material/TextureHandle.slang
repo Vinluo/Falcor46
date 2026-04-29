@@ -62,6 +62,8 @@ struct TextureHandle
     TextureHandle() = default;
     explicit TextureHandle(uint32_t packedData_) : packedData(packedData_) {}
 #else
+    __init() {}
+
     __init(uint32_t packedData) { this.packedData = packedData; }
 #endif
 

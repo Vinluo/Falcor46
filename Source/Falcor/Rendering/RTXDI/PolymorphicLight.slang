@@ -366,6 +366,8 @@ struct PolymorphicLight : IPolymorphicLight
 {
     PackedPolymorphicLight packed = {};
 
+    __init() {}
+
     __init(const PackedPolymorphicLight packed)
     {
         this.packed = packed;
