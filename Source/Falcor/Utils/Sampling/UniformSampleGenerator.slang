@@ -50,6 +50,8 @@ export struct UniformSampleGenerator : ISampleGenerator
      * @param[in] pixel Pixel id.
      * @param[in] sampleNumber Sample number.
      */
+    __init() {}
+
     __init(uint2 pixel, uint sampleNumber)
     {
         UniformSampleGenerator sampleGenerator;

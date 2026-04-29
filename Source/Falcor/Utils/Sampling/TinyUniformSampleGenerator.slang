@@ -48,6 +48,8 @@ export struct TinyUniformSampleGenerator : ISampleGenerator
      * Initializes the sample generator.
      * @param[in] seed Seed value.
      */
+    __init() { this.rng = createLCG(0); }
+
     __init(uint seed) { this.rng = createLCG(seed); }
 
     /**

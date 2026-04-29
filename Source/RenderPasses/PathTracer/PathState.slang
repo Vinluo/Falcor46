@@ -84,8 +84,8 @@ struct PathState
     uint        id = 0;                 ///< Path ID encodes (pixel, sampleIdx) with 12 bits each for pixel x|y and 8 bits for sample index.
 
     uint        flagsAndVertexIndex = 0;///< Higher kPathFlagsBitCount bits: Flags indicating the current status.
-    uint16_t    rejectedHits = uint16_t(0); ///< Number of false intersections rejected along the path.
-    float16_t   sceneLength = float16_t(0); ///< Path length in scene units (0.f at primary hit).
+    uint16_t    rejectedHits;           ///< Number of false intersections rejected along the path.
+    float16_t   sceneLength;            ///< Path length in scene units (0.f at primary hit).
     uint        bounceCounters = 0;     ///< Packed counters for different types of bounces (see BounceType).
 
     // Scatter ray

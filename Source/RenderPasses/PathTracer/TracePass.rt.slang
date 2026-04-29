@@ -63,7 +63,7 @@ struct PathPayload
     __init()
     {
         [unroll] for (uint i = 0; i < 5; i++) packed[i] = uint4(0);
-        hit = uint4(0);
+        hit = {};
         guideData.data = uint4(0);
         guideData.reflectionPos = float3(0);
         guideData.dummy = 0;
