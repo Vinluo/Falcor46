@@ -36,15 +36,6 @@
 
 #include <map>
 
-// Slang 2026 deprecated several "pending data layout" reflection APIs in favor of explicit
-// type-layout queries. Falcor's reflection chain still wants the legacy view; suppress the
-// deprecation warning at file scope until we migrate to the new API.
-#if defined(_MSC_VER)
-#pragma warning(disable : 4996)
-#elif defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-
 using namespace slang;
 
 namespace Falcor
@@ -119,40 +110,9 @@ struct ReflectionPathLink
 // ordinary uniform, texture, buffer, etc. variables. In the 99% case
 // this is all that ever gets used.
 //
-// The `pDeferred` field represents a secondary path that describes
-// where the data that arose due to specialization ended up.
-//
-// E.g., if we have a program like:
-//
-//     struct MyStuff { IFoo f; Texture2D t; }
-//     MyStuff gStuff;
-//     Texture2D gOther;
-//
-// Then `gStuff` will be assigned a starting `t` register of `t0`,
-// and the *primary* path for `gStuff.t` will show that offset.
-//
-// However, if `gStuff.f` gets specialized to some type `Bar`:
-//
-//     struct Bar { Texture2D b; }
-//
-// Then the `gStuff.f.b` field also needs a texture register to be
-// assigned. It can't use registers `t0` or `t1` since those were
-// already allocated in the unspecialized program (to `gStuff.t`
-// and `gOther`, respectively), so it needs to use `t2`.
-//
-// But that means that the allocation for `gStuff` is split into two
-// pieces: a "primary" allocation for `gStuff.t`, and then a secondary
-// allocation for `gStuff.f` that got "deferred" until after specialization
-// (which means it comes after all the un-specialized parameters).
-//
-// The Slang reflection information lets us query both the primary
-// and deferred allocation/layout for a shader parameter, and we
-// need to handle both in order to support specialization.
-//
 struct ReflectionPath
 {
     ReflectionPathLink* pPrimary = nullptr;
-    ReflectionPathLink* pDeferred = nullptr;
 };
 
 // A helper RAII type to extend a `ReflectionPath` with
@@ -169,12 +129,9 @@ struct ExtendedReflectionPath : ReflectionPath
         if (pParent)
         {
             pPrimary = pParent->pPrimary;
-            pDeferred = pParent->pDeferred;
         }
 
-        // Next, if `pVar` has a primary layout (and/or
-        // an optional pending/deferred layout), then
-        // we will extend the appropriate breadcrumb
+        // Next, if `pVar` has a primary layout, extend the breadcrumb
         // trail with its information.
         //
         if (pVar)
@@ -182,13 +139,6 @@ struct ExtendedReflectionPath : ReflectionPath
             primaryLinkStorage.pParent = pPrimary;
             primaryLinkStorage.pVar = pVar;
             pPrimary = &primaryLinkStorage;
-
-            if (auto pDeferredVar = pVar->getPendingDataLayout())
-            {
-                deferredLinkStorage.pParent = pDeferred;
-                deferredLinkStorage.pVar = pDeferredVar;
-                pDeferred = &deferredLinkStorage;
-            }
         }
     }
 
@@ -198,7 +148,6 @@ struct ExtendedReflectionPath : ReflectionPath
     // heap allocation when constructing an extended path.
     //
     ReflectionPathLink primaryLinkStorage;
-    ReflectionPathLink deferredLinkStorage;
 };
 
 static ReflectionResourceType::Type getResourceType(TypeReflection* pSlangType)
@@ -953,7 +902,7 @@ ref<ReflectionType> reflectInterfaceType(
     TypeLayoutReflection* pSlangType,
     ParameterBlockReflection* pBlock,
     ReflectionPath* pPath,
-    ProgramVersion const* pProgramVersion
+    ProgramVersion const*
 )
 {
     auto pType = ReflectionInterfaceType::create(pSlangType);
@@ -964,29 +913,6 @@ ref<ReflectionType> reflectInterfaceType(
     bindingInfo.regSpace = getRegisterSpaceFromPath(pPath->pPrimary, SlangParameterCategory(category));
 
     bindingInfo.flavor = ParameterBlockReflection::ResourceRangeBindingInfo::Flavor::Interface;
-
-    if (auto pSlangPendingTypeLayout = pSlangType->getPendingDataTypeLayout())
-    {
-        ReflectionPath subPath;
-        subPath.pPrimary = pPath->pDeferred;
-        subPath.pDeferred = nullptr;
-
-        auto pPendingBlock = ParameterBlockReflection::createEmpty(pProgramVersion);
-        auto pPendingType = reflectType(pSlangPendingTypeLayout, pPendingBlock.get(), &subPath, pProgramVersion);
-        pPendingBlock->setElementType(pPendingType);
-
-        // TODO: What to do if `pPendingType->getByteSize()` is non-zero?
-
-        pPendingBlock->finalize();
-
-        pType->setParameterBlockReflector(pPendingBlock);
-
-        bindingInfo.pSubObjectReflector = pPendingBlock;
-
-        category = slang::ParameterCategory::Uniform;
-        bindingInfo.regIndex = (uint32_t)getRegisterIndexFromPath(pPath->pDeferred, SlangParameterCategory(category));
-        bindingInfo.regSpace = getRegisterSpaceFromPath(pPath->pPrimary, SlangParameterCategory(category));
-    }
 
     if (pBlock)
     {
@@ -1004,18 +930,7 @@ ref<ReflectionType> reflectSpecializedType(
 )
 {
     auto pSlangBaseType = pSlangType->getElementTypeLayout();
-
-    auto pSlangVarLayout = pSlangType->getSpecializedTypePendingDataVarLayout();
-
-    ReflectionPathLink deferredLink;
-    deferredLink.pParent = pPath->pPrimary;
-    deferredLink.pVar = pSlangVarLayout;
-
-    ReflectionPath path;
-    path.pPrimary = pPath->pPrimary;
-    path.pDeferred = &deferredLink;
-
-    return reflectType(pSlangBaseType, pBlock, &path, pProgramVersion);
+    return reflectType(pSlangBaseType, pBlock, pPath, pProgramVersion);
 }
 
 ref<ReflectionType> reflectType(
